@@ -43,6 +43,11 @@ def _emit_human(r: dict) -> None:
             print(f"{pad}  {pref:>4}  {host}")
     if r.get("mx_error"):
         print(f"{pad}MX lookup error: {r['mx_error']}")
+    diag = r.get("diagnosis")
+    if diag:
+        print(f"{pad}Diagnosis (pyIsEmail):")
+        for k, v in diag.items():
+            print(f"{pad}  {k}: {v}")
     print()
 
 
@@ -69,6 +74,8 @@ def main(argv=None):
     p.add_argument("--lang", default="en", help="Error language (en, ne, hi, ar)")
     p.add_argument("--json", action="store_true", help="Emit JSON output")
     p.add_argument("--mx", action="store_true", help="Resolve MX records (stretch goal)")
+    p.add_argument("--diagnose", action="store_true",
+                   help="Attach per-RFC diagnosis codes via pyIsEmail")
     p.add_argument("--send-test", metavar="TO",
                    help="Send a live SMTPUTF8 test message to TO (stretch goal). "
                         "Reads creds from uaready/sendmail.ini or UAREADY_* env vars.")
@@ -120,7 +127,8 @@ def main(argv=None):
             d = validate_domain(t, lang=args.lang)
             r = {"input": t, **d}
         else:
-            r = validate_email(t, lang=args.lang).to_dict()
+            r = validate_email(t, lang=args.lang,
+                               diagnostics=args.diagnose).to_dict()
 
         adom = r.get("domain_ascii") or r.get("ascii")
         if args.mx and r.get("ok") and adom:

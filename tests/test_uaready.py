@@ -143,6 +143,22 @@ class TestStandardsCompliance(unittest.TestCase):
         self.assertTrue(any("ऀ" <= ch <= "ॿ" for ch in joined),
                         f"expected Devanagari text in error, got: {r.errors}")
 
+    def test_localised_domain_error_nepali(self):
+        r = validate_domain("-invalid-.example", lang="ne")
+        self.assertFalse(r["ok"])
+        joined = " ".join(r["errors"])
+        self.assertTrue(any("ऀ" <= ch <= "ॿ" for ch in joined),
+                        f"expected Devanagari text in error, got: {r['errors']}")
+        self.assertNotIn("Label must not start or end with a hyphen", joined)
+
+    def test_localised_local_char_error_nepali(self):
+        r = validate_email("user name@example.com", lang="ne")
+        self.assertFalse(r.ok)
+        joined = " ".join(r.errors)
+        self.assertTrue(any("ऀ" <= ch <= "ॿ" for ch in joined),
+                        f"expected Devanagari text in error, got: {r.errors}")
+        self.assertNotIn("before the @-sign", joined)
+
     def test_label_length_limit(self):
         r = validate_domain(("x" * 63) + ".example.np")
         self.assertTrue(r["ok"], r["errors"])

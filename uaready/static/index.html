@@ -42,7 +42,7 @@
     margin-bottom: 18px;
   }
   label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-  input[type="text"], select {
+  input[type="text"], select, textarea {
     width: 100%;
     padding: 12px 14px;
     background: var(--panel-2);
@@ -52,7 +52,8 @@
     font-size: 16px;
     font-family: inherit;
   }
-  input[type="text"]:focus, select:focus {
+  textarea { font-size: 14px; resize: vertical; min-height: 90px; line-height: 1.45; }
+  input[type="text"]:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
@@ -173,6 +174,41 @@
     <div id="mx-block" style="margin-top:10px;"></div>
   </div>
 
+  <div class="panel" id="send-panel">
+    <strong>Send test email (live SMTPUTF8)</strong>
+    <p class="hint" style="margin-top:6px;">
+      Validates the recipient against UAReady, then sends a real message via
+      SMTPUTF8 (RFC 6531) if the SMTP server supports it. Requires
+      <code>uaready/sendmail.ini</code> or <code>UAREADY_*</code> env vars.
+    </p>
+    <div class="row">
+      <div style="flex: 2 1 280px;">
+        <label for="send-to">Recipient</label>
+        <input id="send-to" type="text" autocomplete="off" spellcheck="false"
+               placeholder="राम@नेपाल.नेपाल" />
+      </div>
+      <div style="flex: 2 1 280px;">
+        <label for="send-from">From (optional)</label>
+        <input id="send-from" type="text" autocomplete="off" spellcheck="false"
+               placeholder="leave empty to use server default" />
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <label for="send-subject">Subject</label>
+      <input id="send-subject" type="text" value="UAReady test — SMTPUTF8" />
+    </div>
+    <div style="margin-top:12px;">
+      <label for="send-body">Message body</label>
+      <textarea id="send-body" rows="4">नमस्ते — this is a UAReady SMTPUTF8 live test.
+If you can read this, internationalised email works.</textarea>
+    </div>
+    <div class="actions">
+      <button id="send-go">Validate &amp; Send</button>
+      <button id="send-validate" class="secondary">Validate only</button>
+    </div>
+    <div id="send-result" style="margin-top:12px;"></div>
+  </div>
+
   <div class="panel">
     <strong>What this checks</strong>
     <ul style="margin: 8px 0 0 18px; padding: 0; color: var(--muted); font-size: 14px;">
@@ -273,6 +309,114 @@ document.querySelectorAll(".samples button").forEach(b => {
     validate(false);
   });
 });
+
+// ---- send-test panel -------------------------------------------------------
+
+async function validateAddress(value, lang) {
+  const res = await fetch("/api/validate", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ value, kind: "email", lang })
+  });
+  return res.json();
+}
+
+function renderValidationFailure(label, d) {
+  const errs = (d.errors || []).map(e => `<li class="err">✕ ${escape(e)}</li>`).join("");
+  const warns = (d.warnings || []).map(w => `<li class="warn">! ${escape(w)}</li>`).join("");
+  return `
+    <span class="verdict bad">${escape(label)} — not sent</span>
+    <ul class="msgs">${errs}${warns}</ul>
+  `;
+}
+
+function renderSendResult(d) {
+  const ok = !!d.ok;
+  const rows = [];
+  const row = (k, v) => rows.push(`<tr><td>${k}</td><td>${v}</td></tr>`);
+  if (d.to) row("To", `<code>${escape(d.to)}</code>`);
+  if ("smtputf8_advertised" in d)
+    row("SMTPUTF8 advertised", d.smtputf8_advertised ? "yes" : "no");
+  if ("smtputf8_used" in d)
+    row("SMTPUTF8 used", d.smtputf8_used ? "yes" : "no");
+  if (d.message_id) row("Message-ID", `<code>${escape(d.message_id)}</code>`);
+  if (d.error) row("Error", `<span class="err">${escape(d.error)}</span>`);
+  return `
+    <span class="verdict ${ok ? "ok" : "bad"}">${ok ? "Sent ✓" : "Send failed"}</span>
+    <table class="kv" style="margin-top:8px;">${rows.join("")}</table>
+  `;
+}
+
+function renderValidatedOk(label, d) {
+  const rows = [];
+  const row = (k, v) => rows.push(`<tr><td>${k}</td><td>${v}</td></tr>`);
+  if (d.local) row("Local part", `<code>${escape(d.local)}</code>`);
+  const uni = d.domain_unicode || d.unicode;
+  const asc = d.domain_ascii   || d.ascii;
+  if (uni) row("Domain (Unicode)", `<code>${escape(uni)}</code>`);
+  if (asc) row("Domain (ASCII)",   `<code>${escape(asc)}</code>`);
+  if ("smtputf8_required" in d)
+    row("SMTPUTF8 required", d.smtputf8_required ? "yes" : "no");
+  if (Array.isArray(d.scripts) && d.scripts.length)
+    row("Scripts", d.scripts.map(s => `<span class="pill">${escape(s)}</span>`).join(""));
+  const warns = (d.warnings || []).map(w => `<li class="warn">! ${escape(w)}</li>`).join("");
+  return `
+    <span class="verdict ok">${escape(label)} valid ✓</span>
+    <table class="kv" style="margin-top:8px;">${rows.join("")}</table>
+    ${warns ? `<ul class="msgs">${warns}</ul>` : ""}
+  `;
+}
+
+async function sendTest(validateOnly) {
+  const to      = $("send-to").value.trim();
+  const sender  = $("send-from").value.trim();
+  const subject = $("send-subject").value;
+  const body    = $("send-body").value;
+  const lang    = $("lang").value;
+  const out     = $("send-result");
+
+  if (!to) {
+    out.innerHTML = `<span class="verdict bad">Recipient required</span>`;
+    return;
+  }
+
+  out.innerHTML = `<div class="hint">Validating…</div>`;
+  const v = await validateAddress(to, lang);
+  if (!v.ok) {
+    out.innerHTML = renderValidationFailure("Recipient invalid", v);
+    return;
+  }
+
+  if (sender) {
+    const sv = await validateAddress(sender, lang);
+    if (!sv.ok) {
+      out.innerHTML = renderValidationFailure("Sender invalid", sv);
+      return;
+    }
+  }
+
+  if (validateOnly) {
+    out.innerHTML = renderValidatedOk("Recipient", v);
+    return;
+  }
+
+  out.innerHTML = `<div class="hint">Recipient passed validation — sending…</div>`;
+  const res = await fetch("/api/send", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      to, subject, body,
+      ...(sender ? { from: sender } : {}),
+    })
+  });
+  const data = await res.json();
+  out.innerHTML = renderSendResult(data);
+}
+
+$("send-go").addEventListener("click", () => sendTest(false));
+$("send-validate").addEventListener("click", () => sendTest(true));
+$("send-to").addEventListener("keydown",
+  (e) => { if (e.key === "Enter") sendTest(false); });
 </script>
 </body>
 </html>

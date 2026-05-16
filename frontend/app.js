@@ -8,6 +8,11 @@ const validateBtn = $("validate-btn");
 const sendBtn = $("send-btn");
 const form = $("mail-form");
 
+function clearOutput() {
+  summary.innerHTML = "";
+  messages.innerHTML = "";
+}
+
 function setBusy(isBusy) {
   validateBtn.disabled = isBusy;
   sendBtn.disabled = isBusy;
@@ -51,8 +56,7 @@ async function validateRecipient(includeMx = false) {
   const recipient = $("recipient").value.trim();
   if (!recipient) {
     showStatus(false, "Enter a recipient email address first.");
-    messages.innerHTML = "";
-    summary.innerHTML = "";
+    clearOutput();
     return null;
   }
 
@@ -64,19 +68,43 @@ async function validateRecipient(includeMx = false) {
   return response.json();
 }
 
-function renderValidation(data) {
-  summary.innerHTML = "";
-  messages.innerHTML = "";
+function collectPayload() {
+  return {
+    recipient: $("recipient").value.trim(),
+    sender_name: $("sender-name").value.trim(),
+    subject: $("subject").value.trim(),
+    body: $("body").value,
+    lang: "en",
+  };
+}
 
-  showStatus(!!data.ok, data.ok ? "Recipient is valid." : "Recipient is invalid.");
-  addItem("Input", `<code>${escapeHtml(data.input || "")}</code>`);
-  addItem("Normalized", data.normalized ? `<code>${escapeHtml(data.normalized)}</code>` : "");
-  addItem("Local part", data.local ? `<code>${escapeHtml(data.local)}</code>` : "");
-  addItem("Domain Unicode", data.domain_unicode ? `<code>${escapeHtml(data.domain_unicode)}</code>` : "");
-  addItem("Domain ASCII", data.domain_ascii ? `<code>${escapeHtml(data.domain_ascii)}</code>` : "");
-  addItem("SMTPUTF8 required", data.smtputf8_required ? "yes" : "no");
-  addItem("IDNA used", data.idn_required ? "yes" : "no");
-  addItem("Scripts", Array.isArray(data.scripts) ? `<code>${escapeHtml(data.scripts.join(", "))}</code>` : "");
+async function validateCompose() {
+  const response = await fetch("/api/compose/validate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(collectPayload()),
+  });
+
+  return { response, data: await response.json() };
+}
+
+function renderComposeValidation(data) {
+  clearOutput();
+
+  const recipient = data.recipient || {};
+  const linkMarkup = Array.isArray(data.links) && data.links.length
+    ? data.links.map((item) => `<code>${escapeHtml(item)}</code>`).join("<br>")
+    : "";
+
+  showStatus(!!data.ok, data.ok ? "Message is ready to send." : "Fix the errors before sending.");
+  addItem("Recipient", recipient.input ? `<code>${escapeHtml(recipient.input)}</code>` : "");
+  addItem("Normalized", recipient.normalized ? `<code>${escapeHtml(recipient.normalized)}</code>` : "");
+  addItem("Local part", recipient.local ? `<code>${escapeHtml(recipient.local)}</code>` : "");
+  addItem("Domain Unicode", recipient.domain_unicode ? `<code>${escapeHtml(recipient.domain_unicode)}</code>` : "");
+  addItem("Domain ASCII", recipient.domain_ascii ? `<code>${escapeHtml(recipient.domain_ascii)}</code>` : "");
+  addItem("SMTPUTF8 required", "smtputf8_required" in recipient ? (recipient.smtputf8_required ? "yes" : "no") : "");
+  addItem("Links checked", Array.isArray(data.links) ? String(data.links.length) : "0");
+  addItem("Link targets", linkMarkup);
 
   messages.innerHTML = [
     renderMessages(data.errors, "error"),
@@ -87,8 +115,8 @@ function renderValidation(data) {
 async function validateOnly() {
   setBusy(true);
   try {
-    const data = await validateRecipient(true);
-    if (data) renderValidation(data);
+    const { data } = await validateCompose();
+    renderComposeValidation(data);
   } catch (error) {
     showStatus(false, `Validation failed: ${error.message}`);
   } finally {
@@ -100,38 +128,35 @@ async function sendEmail(event) {
   event.preventDefault();
   setBusy(true);
   try {
-    const validation = await validateRecipient(false);
-    if (!validation || !validation.ok) {
-      renderValidation(validation || { ok: false, errors: ["Recipient validation failed."] });
+    const { data: validation } = await validateCompose();
+    renderComposeValidation(validation);
+    if (!validation.ok) {
       return;
     }
-
-    const payload = {
-      recipient: $("recipient").value.trim(),
-      sender_name: $("sender-name").value.trim(),
-      subject: $("subject").value.trim(),
-      body: $("body").value,
-    };
 
     const response = await fetch("/api/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(collectPayload()),
     });
     const data = await response.json();
 
     if (!response.ok || !data.ok) {
       showStatus(false, data.error || "Sending failed.");
-      messages.innerHTML = renderMessages(data.details || [data.error || "Unknown error"], "error");
+      messages.innerHTML = [
+        renderMessages(data.errors || data.details || [data.error || "Unknown error"], "error"),
+        renderMessages(data.warnings, "warn"),
+      ].join("");
       return;
     }
 
     showStatus(true, `Email sent to ${data.recipient}.`);
-    summary.innerHTML = "";
+    clearOutput();
     addItem("Recipient", `<code>${escapeHtml(data.recipient)}</code>`);
-    addItem("Sender", `<code>${escapeHtml(data.sender)}</code>`);
-    addItem("SMTPUTF8 required", data.smtp_utf8_required ? "yes" : "no");
-    messages.innerHTML = "";
+    addItem("Links checked", String(data.links_checked || 0));
+    addItem("SMTPUTF8 used", data.smtputf8_used ? "yes" : "no");
+    addItem("SMTPUTF8 advertised", data.smtputf8_advertised ? "yes" : "no");
+    addItem("Message ID", data.message_id ? `<code>${escapeHtml(data.message_id)}</code>` : "");
   } catch (error) {
     showStatus(false, `Sending failed: ${error.message}`);
   } finally {
