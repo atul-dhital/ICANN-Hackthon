@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UAReady — Internationalised Email & Domain Validator</title>
-<meta name="description" content="Validate internationalised email addresses and domains across scripts — Devanagari, Arabic, Cyrillic, CJK — with SMTPUTF8, EAI, and IDNA2008 compliance." />
+<title>UAReady - Internationalised Email &amp; Domain Validator</title>
+<meta name="description" content="Validate internationalised email addresses and domains across scripts - Devanagari, Arabic, Cyrillic, CJK - with SMTPUTF8, EAI, and IDNA2008 compliance." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
@@ -18,12 +18,10 @@
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
-/* Animated bg */
 body::before{content:'';position:fixed;inset:0;z-index:-1;
   background:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12),transparent 70%),
              radial-gradient(ellipse 60% 50% at 80% 100%,rgba(52,211,153,.06),transparent 60%);
   pointer-events:none}
-/* Hero */
 .hero{text-align:center;padding:56px 24px 40px;position:relative}
 .hero::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;
   background:linear-gradient(90deg,transparent,var(--border-h),transparent)}
@@ -38,15 +36,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;
 .badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
 .badge{font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid var(--border);color:var(--muted);
   background:var(--surface);backdrop-filter:blur(8px);font-weight:500;letter-spacing:.3px}
-/* Layout */
 main{max-width:880px;margin:0 auto;padding:32px 20px 80px}
-/* Glass panels */
 .card{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);
   border-radius:var(--radius);padding:24px;margin-bottom:20px;transition:border-color .3s,box-shadow .3s}
 .card:hover{border-color:var(--border-h);box-shadow:0 0 40px var(--glow)}
 .card-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .card-title .icon{font-size:18px}
-/* Form */
 label{display:block;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 input[type="text"],select,textarea{width:100%;padding:12px 14px;background:rgba(15,23,42,.6);color:var(--text);
   border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:'Inter',sans-serif;
@@ -57,20 +52,17 @@ select{cursor:pointer;appearance:auto}
 .row{display:flex;gap:14px;flex-wrap:wrap;align-items:end}
 .row>*{flex:1 1 180px;min-width:0}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-/* Buttons */
 .btn{padding:11px 20px;border:0;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;
   font-family:'Inter',sans-serif;transition:all .2s;position:relative;overflow:hidden}
 .btn-primary{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(99,102,241,.45)}
 .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
 .btn-secondary:hover{border-color:var(--accent);color:var(--accent-2)}
-/* Sample chips */
 .samples{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
 .samples .label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
 .chip{padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);
   background:var(--surface-2);color:var(--text);font-family:'Inter',sans-serif;transition:all .2s}
 .chip:hover{border-color:var(--accent);color:var(--accent-2);transform:translateY(-1px)}
-/* Results */
 .verdict{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;font-weight:700;font-size:14px;
   animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -87,15 +79,8 @@ table.kv tr:last-child td{border-bottom:none}
 code,.mono{font-family:'JetBrains Mono',monospace;font-size:13px}
 ul.msgs{margin:8px 0 0;padding:0;list-style:none}
 ul.msgs li{padding:5px 0;font-size:14px}
-.hint{color:var(--muted);font-size:13px}
-/* Info cards */
-.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:8px}
-.info-item{padding:14px;border-radius:10px;background:rgba(15,23,42,.4);border:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.5}
-.info-item strong{display:block;color:var(--text);font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-/* Footer */
 footer{text-align:center;padding:20px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
 footer a{color:var(--accent-2);text-decoration:none}
-/* Responsive */
 @media(max-width:600px){.hero{padding:40px 16px 28px}.hero h1{font-size:26px}main{padding:20px 12px 60px}
   .card{padding:18px}table.kv td:first-child{width:130px}}
 </style>
@@ -105,10 +90,10 @@ footer a{color:var(--accent-2);text-decoration:none}
 <section class="hero">
   <div class="logo"><span class="dot"></span> UAReady</div>
   <h1>Internationalised Email &amp; Domain Validator</h1>
-  <p>Validate email addresses and domains across scripts — conforming to global internet standards.</p>
+  <p>Validate email addresses and domains across scripts - conforming to global internet standards.</p>
   <div class="badges">
-    <span class="badge">RFC 6531 — SMTPUTF8</span>
-    <span class="badge">RFC 6532 — EAI</span>
+    <span class="badge">RFC 6531 - SMTPUTF8</span>
+    <span class="badge">RFC 6532 - EAI</span>
     <span class="badge">IDNA2008</span>
     <span class="badge">UTS #46</span>
     <span class="badge">Unicode NFC</span>
@@ -117,9 +102,8 @@ footer a{color:var(--accent-2);text-decoration:none}
 </section>
 
 <main>
-  <!-- Validator -->
   <div class="card">
-    <div class="card-title"><span class="icon">🔍</span> Validate</div>
+    <div class="card-title"><span class="icon">&#128269;</span> Validate</div>
     <div class="row">
       <div style="flex:3 1 300px">
         <label for="input">Email or Domain</label>
@@ -150,76 +134,35 @@ footer a{color:var(--accent-2);text-decoration:none}
     </div>
   </div>
 
-  <!-- Result -->
   <div id="result" class="card" style="display:none">
     <div id="verdict-wrap"></div>
     <table class="kv" id="kv"></table>
     <div id="errors-block" style="margin-top:10px"></div>
     <div id="mx-block" style="margin-top:10px"></div>
   </div>
-
-  <!-- Send panel -->
-  <div class="card" id="send-panel">
-    <div class="card-title"><span class="icon">📧</span> Send Test Email (Live SMTPUTF8)</div>
-    <p class="hint" style="margin-bottom:16px">Validates the recipient, then sends a real message via SMTPUTF8 (RFC 6531). Requires <code>sendmail.ini</code> or <code>UAREADY_*</code> env vars.</p>
-    <div class="row">
-      <div style="flex:2 1 260px">
-        <label for="send-to">Recipient</label>
-        <input id="send-to" type="text" autocomplete="off" spellcheck="false" placeholder="राम@नेपाल.नेपाल" />
-      </div>
-      <div style="flex:2 1 260px">
-        <label for="send-from">From (optional)</label>
-        <input id="send-from" type="text" autocomplete="off" spellcheck="false" placeholder="leave empty for server default" />
-      </div>
-    </div>
-    <div style="margin-top:14px">
-      <label for="send-subject">Subject</label>
-      <input id="send-subject" type="text" value="UAReady test — SMTPUTF8" />
-    </div>
-    <div style="margin-top:14px">
-      <label for="send-body">Message Body</label>
-      <textarea id="send-body" rows="3">नमस्ते — this is a UAReady SMTPUTF8 live test.
-If you can read this, internationalised email works.</textarea>
-    </div>
-    <div class="actions">
-      <button class="btn btn-primary" id="send-go">Validate &amp; Send</button>
-      <button class="btn btn-secondary" id="send-validate">Validate Only</button>
-    </div>
-    <div id="send-result" style="margin-top:14px"></div>
-  </div>
-
-  <!-- Standards info -->
-  <div class="card">
-    <div class="card-title"><span class="icon">📋</span> Standards Compliance</div>
-    <div class="info-grid">
-      <div class="info-item"><strong>Unicode NFC</strong>Normalisation before any comparison or encoding</div>
-      <div class="info-item"><strong>IDNA2008 + UTS#46</strong>Domain encoding via non-transitional mapping</div>
-      <div class="info-item"><strong>RFC 6532 (EAI)</strong>Non-ASCII Unicode in mailbox local part</div>
-      <div class="info-item"><strong>RFC 5321 Limits</strong>64-octet local · 253-octet domain · 254 total</div>
-      <div class="info-item"><strong>SMTPUTF8</strong>Flagged when mailbox contains non-ASCII characters</div>
-      <div class="info-item"><strong>MX Lookup</strong>DNS resolution against A-label (punycode) domain</div>
-    </div>
-  </div>
 </main>
 
 <footer>
-  <strong>UAReady</strong> — built for <a href="#">UA Adaptation Hackathon Nepal 2026</a> · ICANN
+  <strong>UAReady</strong> - built for <a href="#">UA Adaptation Hackathon Nepal 2026</a> - ICANN
 </footer>
 
 <script>
 const $ = (id) => document.getElementById(id);
 const langStrings = {
   en: { valid: "Valid", invalid: "Invalid" },
-  ne: { valid: "मान्य",  invalid: "अमान्य" },
-  hi: { valid: "मान्य",  invalid: "अमान्य" },
-  ar: { valid: "صالح",   invalid: "غير صالح" },
+  ne: { valid: "मान्य", invalid: "अमान्य" },
+  hi: { valid: "मान्य", invalid: "अमान्य" },
+  ar: { valid: "صالح", invalid: "غير صالح" },
 };
 
 async function validate(withMx) {
-  const value = $("input").value, kind = $("kind").value, lang = $("lang").value;
+  const value = $("input").value;
+  const kind = $("kind").value;
+  const lang = $("lang").value;
   if (!value.trim()) return;
   const res = await fetch("/api/validate", {
-    method: "POST", headers: {"Content-Type": "application/json"},
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ value, kind, lang, mx: withMx })
   });
   render(await res.json(), lang);
@@ -228,94 +171,55 @@ async function validate(withMx) {
 function render(d, lang) {
   $("result").style.display = "block";
   $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
-  const ok = !!d.ok, s = langStrings[lang] || langStrings.en;
+  const ok = !!d.ok;
+  const s = langStrings[lang] || langStrings.en;
   $("verdict-wrap").innerHTML = `<span class="verdict ${ok ? "ok" : "bad"}">${ok ? s.valid : s.invalid}</span>`;
   const rows = [];
   const add = (k, v) => { if (v !== undefined && v !== null && v !== "") rows.push([k, v]); };
   add("Input", `<code>${esc(d.input)}</code>`);
   if (d.normalized && d.normalized !== d.input) add("NFC normalised", `<code>${esc(d.normalized)}</code>`);
   if (d.local) add("Local part", `<code>${esc(d.local)}</code>`);
-  const uni = d.domain_unicode || d.unicode, asc = d.domain_ascii || d.ascii;
+  const uni = d.domain_unicode || d.unicode;
+  const asc = d.domain_ascii || d.ascii;
   if (uni) add("Domain (Unicode)", `<code>${esc(uni)}</code>`);
   if (asc) add("Domain (A-label)", `<code>${esc(asc)}</code>`);
-  if (Array.isArray(d.scripts) && d.scripts.length)
+  if (Array.isArray(d.scripts) && d.scripts.length) {
     add("Scripts", d.scripts.map(s => `<span class="pill">${esc(s)}</span>`).join(""));
-  if ("smtputf8_required" in d)
-    add("SMTPUTF8 required", d.smtputf8_required ? "✓ yes (non-ASCII mailbox)" : "✗ no");
-  if ("idn_required" in d)
-    add("IDN encoding", d.idn_required ? "✓ yes (non-ASCII domain)" : "✗ no");
-  $("kv").innerHTML = rows.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+  }
+  if ("smtputf8_required" in d) add("SMTPUTF8 required", d.smtputf8_required ? "yes (non-ASCII mailbox)" : "no");
+  if ("idn_required" in d) add("IDN encoding", d.idn_required ? "yes (non-ASCII domain)" : "no");
+  $("kv").innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+
   let eh = "";
-  if ((d.errors||[]).length) eh += `<ul class="msgs">${d.errors.map(e=>`<li class="err">✕ ${esc(e)}</li>`).join("")}</ul>`;
-  if ((d.warnings||[]).length) eh += `<ul class="msgs">${d.warnings.map(w=>`<li class="warn">⚠ ${esc(w)}</li>`).join("")}</ul>`;
+  if ((d.errors || []).length) eh += `<ul class="msgs">${d.errors.map(e => `<li class="err">x ${esc(e)}</li>`).join("")}</ul>`;
+  if ((d.warnings || []).length) eh += `<ul class="msgs">${d.warnings.map(w => `<li class="warn">! ${esc(w)}</li>`).join("")}</ul>`;
   $("errors-block").innerHTML = eh;
+
   let mh = "";
-  if (Array.isArray(d.mx) && d.mx.length)
-    mh = `<strong style="font-size:13px">MX Records</strong><ul class="msgs">${d.mx.map(([p,h])=>`<li><code>${p}  ${esc(h)}</code></li>`).join("")}</ul>`;
-  else if (d.mx_error) mh = `<div class="warn">MX lookup failed: ${esc(d.mx_error)}</div>`;
+  if (Array.isArray(d.mx) && d.mx.length) {
+    mh = `<strong style="font-size:13px">MX Records</strong><ul class="msgs">${d.mx.map(([p, h]) => `<li><code>${p}  ${esc(h)}</code></li>`).join("")}</ul>`;
+  } else if (d.mx_error) {
+    mh = `<div class="warn">MX lookup failed: ${esc(d.mx_error)}</div>`;
+  }
   $("mx-block").innerHTML = mh;
 }
 
-function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+}
 
 $("go").addEventListener("click", () => validate(false));
 $("go-mx").addEventListener("click", () => validate(true));
-$("input").addEventListener("keydown", e => { if (e.key === "Enter") validate(false); });
-document.querySelectorAll(".chip").forEach(b => {
+$("input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") validate(false);
+});
+document.querySelectorAll(".chip").forEach((b) => {
   b.addEventListener("click", () => {
     $("input").value = b.dataset.sample;
     $("kind").value = b.dataset.kind || "email";
     validate(false);
   });
 });
-
-// Send panel
-async function validateAddr(value, lang) {
-  const res = await fetch("/api/validate", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({value,kind:"email",lang}) });
-  return res.json();
-}
-function renderValFail(label, d) {
-  return `<span class="verdict bad">${esc(label)} — not sent</span><ul class="msgs">${(d.errors||[]).map(e=>`<li class="err">✕ ${esc(e)}</li>`).join("")}${(d.warnings||[]).map(w=>`<li class="warn">⚠ ${esc(w)}</li>`).join("")}</ul>`;
-}
-function renderSendOk(d) {
-  const ok = !!d.ok, rows = [];
-  const row = (k,v) => rows.push(`<tr><td>${k}</td><td>${v}</td></tr>`);
-  if (d.to) row("To", `<code>${esc(d.to)}</code>`);
-  if ("smtputf8_advertised" in d) row("SMTPUTF8 advertised", d.smtputf8_advertised ? "yes" : "no");
-  if ("smtputf8_used" in d) row("SMTPUTF8 used", d.smtputf8_used ? "yes" : "no");
-  if (d.message_id) row("Message-ID", `<code>${esc(d.message_id)}</code>`);
-  if (d.error) row("Error", `<span class="err">${esc(d.error)}</span>`);
-  return `<span class="verdict ${ok?"ok":"bad"}">${ok?"Sent ✓":"Send failed"}</span><table class="kv" style="margin-top:8px">${rows.join("")}</table>`;
-}
-function renderValOk(label, d) {
-  const rows = [];
-  const row = (k,v) => rows.push(`<tr><td>${k}</td><td>${v}</td></tr>`);
-  if (d.local) row("Local", `<code>${esc(d.local)}</code>`);
-  const uni=d.domain_unicode||d.unicode, asc=d.domain_ascii||d.ascii;
-  if (uni) row("Domain", `<code>${esc(uni)}</code>`);
-  if (asc) row("A-label", `<code>${esc(asc)}</code>`);
-  if ("smtputf8_required" in d) row("SMTPUTF8", d.smtputf8_required?"yes":"no");
-  if (Array.isArray(d.scripts)&&d.scripts.length) row("Scripts", d.scripts.map(s=>`<span class="pill">${esc(s)}</span>`).join(""));
-  const w=(d.warnings||[]).map(w=>`<li class="warn">⚠ ${esc(w)}</li>`).join("");
-  return `<span class="verdict ok">${esc(label)} valid ✓</span><table class="kv" style="margin-top:8px">${rows.join("")}</table>${w?`<ul class="msgs">${w}</ul>`:""}`;
-}
-async function sendTest(valOnly) {
-  const to=$("send-to").value.trim(), sender=$("send-from").value.trim(),
-        subject=$("send-subject").value, body=$("send-body").value, lang=$("lang").value, out=$("send-result");
-  if (!to) { out.innerHTML=`<span class="verdict bad">Recipient required</span>`; return; }
-  out.innerHTML=`<div class="hint">Validating…</div>`;
-  const v = await validateAddr(to, lang);
-  if (!v.ok) { out.innerHTML=renderValFail("Recipient invalid", v); return; }
-  if (sender) { const sv=await validateAddr(sender,lang); if(!sv.ok){out.innerHTML=renderValFail("Sender invalid",sv);return;} }
-  if (valOnly) { out.innerHTML=renderValOk("Recipient", v); return; }
-  out.innerHTML=`<div class="hint">Sending…</div>`;
-  const res = await fetch("/api/send", { method:"POST", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({to,subject,body,...(sender?{from:sender}:{})}) });
-  out.innerHTML = renderSendOk(await res.json());
-}
-$("send-go").addEventListener("click", () => sendTest(false));
-$("send-validate").addEventListener("click", () => sendTest(true));
-$("send-to").addEventListener("keydown", e => { if (e.key==="Enter") sendTest(false); });
 </script>
 </body>
 </html>
