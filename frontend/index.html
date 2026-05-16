@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UAReady Mail</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<main class="shell">
+  <section class="hero card">
+    <p class="eyebrow">UAReady frontend</p>
+    <h1>Validate internationalised email addresses and send mail</h1>
+    <p class="lede">
+      Supports SMTPUTF8, EAI, and IDNA2008 through the UAReady validator.
+      The form validates the recipient first, then sends via the configured SMTP server.
+    </p>
+  </section>
+
+  <section class="card form-card">
+    <form id="mail-form" novalidate>
+      <div class="grid">
+        <label>
+          <span>Recipient email</span>
+          <input id="recipient" name="recipient" type="text" inputmode="email" autocomplete="off"
+                 spellcheck="false" placeholder="राम@नेपाल.नेपाल" required />
+        </label>
+
+        <label>
+          <span>Your name</span>
+          <input id="sender-name" name="sender_name" type="text" autocomplete="name"
+                 placeholder="UAReady Mailer" />
+        </label>
+
+        <label class="wide">
+          <span>Subject</span>
+          <input id="subject" name="subject" type="text" placeholder="Hello from UAReady" required />
+        </label>
+
+        <label class="wide">
+          <span>Message</span>
+          <textarea id="body" name="body" rows="8" placeholder="Write your email here..." required></textarea>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="validate-btn">Validate</button>
+        <button type="submit" id="send-btn">Validate & send</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" id="status-card" hidden>
+    <div class="status-line" id="status-line"></div>
+    <dl class="summary" id="summary"></dl>
+    <div id="messages"></div>
+  </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>
