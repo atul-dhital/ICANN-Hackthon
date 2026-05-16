@@ -498,8 +498,8 @@
         </div>
       </div>
       <div class="actions">
-        <button class="btn btn-primary" id="go">Submit</button>
-        <button class="btn btn-secondary" id="go-mx">Submit + MX Lookup</button>
+        <button class="btn btn-primary" id="submit">Submit</button>
+        <button class="btn btn-secondary" id="submit-mx">Submit + MX Lookup</button>
       </div>
       <div class="samples">
         <span class="label">Try:</span>
@@ -587,8 +587,8 @@
       return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
     }
 
-    $("go").addEventListener("click", () => validate(false));
-    $("go-mx").addEventListener("click", () => validate(true));
+    $("submit").addEventListener("click", () => validate(false));
+    $("submit-mx").addEventListener("click", () => validate(true));
     $("input").addEventListener("keydown", (e) => {
       if (e.key === "Enter") validate(false);
     });
