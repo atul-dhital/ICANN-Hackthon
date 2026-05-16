@@ -135,6 +135,55 @@ curl -s -X POST http://127.0.0.1:8080/api/validate \
 
 ---
 
+## Stretch goal: live SMTPUTF8 send
+
+UAReady can send a real UTF-8 email through Gmail (or any SMTPUTF8-capable
+server) and report whether the server advertised the `SMTPUTF8` extension
+at `EHLO` time, and whether it was used for this particular send.
+
+### One-time setup
+
+```bash
+cp uaready/sendmail.ini.example uaready/sendmail.ini
+# edit uaready/sendmail.ini  →  fill in your Gmail address + app password
+```
+
+The real `sendmail.ini` is **gitignored**. Generate a Gmail app password at
+<https://myaccount.google.com/apppasswords> — do **not** use your account
+password and never paste app passwords into chat or commit them.
+
+Environment variables override the ini file:
+
+```
+UAREADY_SMTP_SERVER     UAREADY_SMTP_PORT     UAREADY_SMTP_SSL
+UAREADY_AUTH_USERNAME   UAREADY_AUTH_PASSWORD UAREADY_DEFAULT_FROM
+```
+
+### CLI
+
+```bash
+python -m uaready --send-test recipient@example.com
+python -m uaready --send-test राम@example.com --json
+```
+
+### HTTP
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/send \
+     -H 'Content-Type: application/json' \
+     -d '{"to": "recipient@example.com",
+          "subject": "नमस्ते",
+          "body": "UAReady SMTPUTF8 demo"}'
+```
+
+The response includes `smtputf8_advertised` (did the server announce the
+extension?) and `smtputf8_used` (did this send actually invoke it?). When
+either the sender or recipient has a non-ASCII mailbox, UAReady refuses to
+send through a server that does not advertise SMTPUTF8 — a clean failure
+mode rather than a silent transcoding bug.
+
+---
+
 ## Scripts supported
 
 Tested explicitly: **Latin**, **Devanagari** (priority — Nepal relevance),

@@ -3,3 +3,7 @@ venv/
 .idea
 *.pyc
 *.swp
+
+# UAReady local SMTP credentials — never commit
+uaready/sendmail.ini
+.env

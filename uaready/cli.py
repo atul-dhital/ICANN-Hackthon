@@ -69,7 +69,45 @@ def main(argv=None):
     p.add_argument("--lang", default="en", help="Error language (en, ne, hi, ar)")
     p.add_argument("--json", action="store_true", help="Emit JSON output")
     p.add_argument("--mx", action="store_true", help="Resolve MX records (stretch goal)")
+    p.add_argument("--send-test", metavar="TO",
+                   help="Send a live SMTPUTF8 test message to TO (stretch goal). "
+                        "Reads creds from uaready/sendmail.ini or UAREADY_* env vars.")
+    p.add_argument("--from", dest="sender", help="Override sender for --send-test")
+    p.add_argument("--subject", default="UAReady test — SMTPUTF8",
+                   help="Subject line for --send-test")
+    p.add_argument("--body",
+                   default="नमस्ते — this is a UAReady SMTPUTF8 live test.\n"
+                           "If you can read this, internationalised email works.",
+                   help="Body for --send-test")
     args = p.parse_args(argv)
+
+    if args.send_test:
+        from .sendmail import send, SendResult
+        try:
+            res = send(args.send_test, args.subject, args.body, sender=args.sender)
+        except RuntimeError as e:
+            res = SendResult(ok=False, smtputf8_used=False,
+                             smtputf8_advertised=False, error=str(e))
+        out = {
+            "to": args.send_test,
+            "ok": res.ok,
+            "smtputf8_used": res.smtputf8_used,
+            "smtputf8_advertised": res.smtputf8_advertised,
+            "message_id": res.message_id,
+            "error": res.error,
+        }
+        if args.json:
+            print(json.dumps(out, ensure_ascii=False, indent=2))
+        else:
+            print(f"To: {args.send_test}")
+            print(f"  Sent: {res.ok}")
+            print(f"  SMTPUTF8 advertised by server: {res.smtputf8_advertised}")
+            print(f"  SMTPUTF8 used in this send:    {res.smtputf8_used}")
+            if res.message_id:
+                print(f"  Message-ID: {res.message_id}")
+            if res.error:
+                print(f"  Error: {res.error}")
+        sys.exit(0 if res.ok else 1)
 
     targets = [args.input] if args.input else [
         line.strip() for line in sys.stdin if line.strip()

@@ -63,6 +63,31 @@ def api_mx():
     return jsonify({"ok": True, "domain": res["ascii"], "mx": mx})
 
 
+@app.route("/api/send", methods=["POST"])
+def api_send():
+    """Stretch goal: live SMTPUTF8 send. Requires uaready/sendmail.ini."""
+    from .sendmail import send
+    payload = request.get_json(force=True, silent=True) or {}
+    to = (payload.get("to") or "").strip()
+    subject = payload.get("subject") or "UAReady test — SMTPUTF8"
+    body = payload.get("body") or "UAReady SMTPUTF8 live-send test."
+    sender = (payload.get("from") or "").strip() or None
+    if not to:
+        return jsonify({"ok": False, "error": "'to' is required"}), 400
+    try:
+        res = send(to, subject, body, sender=sender)
+    except RuntimeError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+    return jsonify({
+        "ok": res.ok,
+        "to": to,
+        "smtputf8_advertised": res.smtputf8_advertised,
+        "smtputf8_used": res.smtputf8_used,
+        "message_id": res.message_id,
+        "error": res.error,
+    })
+
+
 @app.route("/api/health")
 def health():
     return jsonify({"ok": True, "service": "uaready"})

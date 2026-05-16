@@ -1,0 +1,15 @@
+; UAReady — local SMTP credentials for the SMTPUTF8 live-send stretch goal.
+;
+; 1. Copy this file to  uaready/sendmail.ini  (the real filename is gitignored).
+; 2. Fill in your Gmail address and a 16-char app password.
+; 3. NEVER commit the real file. NEVER paste the password into chat / repos.
+;
+; Generate a Gmail app password:  https://myaccount.google.com/apppasswords
+
+[sendmail]
+smtp_server   = smtp.gmail.com
+smtp_port     = 465
+smtp_ssl      = ssl
+auth_username = YourGmailUser@gmail.com
+auth_password = your-16-char-app-password
+default_from  = YourGmailUser@gmail.com
