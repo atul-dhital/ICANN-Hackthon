@@ -334,7 +334,7 @@ Contact
 -------
 
 To send questions, thoughts or a bar of chocolate, just drop an e-mail at
-[marcin@ulikowski.pl](mailto:marcin@ulikowski.pl).
+[Team-Sushan@gmail.com](mailto:Team-Sushan@gmail.com).
 Any feedback is appreciated. If you have found some confirmed phishing domains
 or just like this tool, please don't hesitate and send a message. Thank you.
 

@@ -6,5 +6,7 @@ ppdeep>=20200505
 py-tlsh>=4.5.0
 tld>=0.9.1
 idna>=2.8
+email-validator>=2.0.0
+pyIsEmail>=2.0.0
 #Pillow>=7.0.0
 #selenium>=4.0.0

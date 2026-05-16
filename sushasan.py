@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+__author__ = 'Team-Sushan'
+__version__ = '20250130'
+__email__ = 'Team-Sushan@gmail.com'
+
 import re
 import sys
 import socket

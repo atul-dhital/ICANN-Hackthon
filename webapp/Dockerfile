@@ -1,7 +1,7 @@
 # Build from the repository root: docker build -f webapp/Dockerfile -t sushasan_webapp .
 
 FROM       debian:stable-slim
-LABEL      maintainer="marcin@ulikowski.pl"
+LABEL      maintainer="Team-Sushan@gmail.com"
 
 WORKDIR    /opt/sushasan
 

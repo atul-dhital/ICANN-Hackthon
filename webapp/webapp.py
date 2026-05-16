@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 r'''
-Created by Marcin Ulikowski <marcin@ulikowski.pl>
+Created by Team-Sushan <Team-Sushan@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

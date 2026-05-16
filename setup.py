@@ -16,11 +16,9 @@ def get_version(rel_path):
 setup(
 	name='sushasan',
 	version=get_version('sushasan.py'),
-	author='Marcin Ulikowski',
-	author_email='marcin@ulikowski.pl',
+	author='Team-Sushan',
+	author_email='Team-Sushan@gmail.com',
 	description='Domain name permutation engine for detecting homograph phishing attacks, typo squatting, and brand impersonation',
-	long_description='Project website: https://github.com/elceef/sushasan',
-	url='https://github.com/elceef/sushasan',
 	license='ASL 2.0',
 	py_modules=['sushasan'],
 	entry_points={
