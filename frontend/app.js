@@ -96,7 +96,7 @@ function renderComposeValidation(data) {
     ? data.links.map((item) => `<code>${escapeHtml(item)}</code>`).join("<br>")
     : "";
 
-  showStatus(!!data.ok, data.ok ? "Message is ready to send." : "Fix the errors before sending.");
+  showStatus(!!data.ok, data.ok ? "Message is ready to send." : "Related issues found. Fix them before sending.");
   addItem("Recipient", recipient.input ? `<code>${escapeHtml(recipient.input)}</code>` : "");
   addItem("Normalized", recipient.normalized ? `<code>${escapeHtml(recipient.normalized)}</code>` : "");
   addItem("Local part", recipient.local ? `<code>${escapeHtml(recipient.local)}</code>` : "");
@@ -142,7 +142,7 @@ async function sendEmail(event) {
     const data = await response.json();
 
     if (!response.ok || !data.ok) {
-      showStatus(false, data.error || "Sending failed.");
+      showStatus(false, "Related issues found. Email was not sent.");
       messages.innerHTML = [
         renderMessages(data.errors || data.details || [data.error || "Unknown error"], "error"),
         renderMessages(data.warnings, "warn"),
@@ -158,7 +158,7 @@ async function sendEmail(event) {
     addItem("SMTPUTF8 advertised", data.smtputf8_advertised ? "yes" : "no");
     addItem("Message ID", data.message_id ? `<code>${escapeHtml(data.message_id)}</code>` : "");
   } catch (error) {
-    showStatus(false, `Sending failed: ${error.message}`);
+    showStatus(false, `Related issues found. ${error.message}`);
   } finally {
     setBusy(false);
   }

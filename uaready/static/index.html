@@ -1,225 +1,605 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UAReady - Internationalised Email &amp; Domain Validator</title>
-<meta name="description" content="Validate internationalised email addresses and domains across scripts - Devanagari, Arabic, Cyrillic, CJK - with SMTPUTF8, EAI, and IDNA2008 compliance." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#050a18;--surface:rgba(15,23,42,.65);--surface-2:rgba(30,41,59,.5);
-  --border:rgba(99,115,146,.2);--border-h:rgba(99,115,146,.35);
-  --text:#e2e8f0;--muted:#8b9dc3;--accent:#6366f1;--accent-2:#818cf8;
-  --good:#34d399;--bad:#fb7185;--warn:#fbbf24;
-  --glow:rgba(99,102,241,.15);--radius:14px;
-}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;z-index:-1;
-  background:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12),transparent 70%),
-             radial-gradient(ellipse 60% 50% at 80% 100%,rgba(52,211,153,.06),transparent 60%);
-  pointer-events:none}
-.hero{text-align:center;padding:56px 24px 40px;position:relative}
-.hero::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;
-  background:linear-gradient(90deg,transparent,var(--border-h),transparent)}
-.logo{font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--accent-2);margin-bottom:12px;
-  display:inline-flex;align-items:center;gap:8px}
-.logo .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
-.hero h1{font-size:clamp(28px,5vw,44px);font-weight:800;letter-spacing:-.02em;
-  background:linear-gradient(135deg,#e2e8f0 0%,#818cf8 50%,#34d399 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;margin-bottom:12px}
-.hero p{color:var(--muted);font-size:15px;max-width:600px;margin:0 auto}
-.badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
-.badge{font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid var(--border);color:var(--muted);
-  background:var(--surface);backdrop-filter:blur(8px);font-weight:500;letter-spacing:.3px}
-main{max-width:880px;margin:0 auto;padding:32px 20px 80px}
-.card{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);
-  border-radius:var(--radius);padding:24px;margin-bottom:20px;transition:border-color .3s,box-shadow .3s}
-.card:hover{border-color:var(--border-h);box-shadow:0 0 40px var(--glow)}
-.card-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.card-title .icon{font-size:18px}
-label{display:block;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-input[type="text"],select,textarea{width:100%;padding:12px 14px;background:rgba(15,23,42,.6);color:var(--text);
-  border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:'Inter',sans-serif;
-  transition:border-color .2s,box-shadow .2s}
-textarea{font-size:14px;resize:vertical;min-height:80px}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
-select{cursor:pointer;appearance:auto}
-.row{display:flex;gap:14px;flex-wrap:wrap;align-items:end}
-.row>*{flex:1 1 180px;min-width:0}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.btn{padding:11px 20px;border:0;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all .2s;position:relative;overflow:hidden}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(99,102,241,.45)}
-.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent-2)}
-.samples{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
-.samples .label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.chip{padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);
-  background:var(--surface-2);color:var(--text);font-family:'Inter',sans-serif;transition:all .2s}
-.chip:hover{border-color:var(--accent);color:var(--accent-2);transform:translateY(-1px)}
-.verdict{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;font-weight:700;font-size:14px;
-  animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.verdict.ok{background:rgba(52,211,153,.12);color:var(--good);border:1px solid rgba(52,211,153,.2)}
-.verdict.bad{background:rgba(251,113,133,.12);color:var(--bad);border:1px solid rgba(251,113,133,.2)}
-.verdict::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
-table.kv{width:100%;border-collapse:collapse;margin-top:12px}
-table.kv td{padding:8px 0;font-size:14px;vertical-align:top;border-bottom:1px solid rgba(99,115,146,.08)}
-table.kv td:first-child{color:var(--muted);width:200px;padding-right:16px;font-weight:500;font-size:13px}
-table.kv tr:last-child td{border-bottom:none}
-.pill{display:inline-block;padding:3px 10px;background:var(--surface-2);border:1px solid var(--border);
-  border-radius:99px;font-size:12px;margin-right:4px;font-weight:500}
-.err{color:var(--bad)}.warn{color:var(--warn)}
-code,.mono{font-family:'JetBrains Mono',monospace;font-size:13px}
-ul.msgs{margin:8px 0 0;padding:0;list-style:none}
-ul.msgs li{padding:5px 0;font-size:14px}
-footer{text-align:center;padding:20px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
-footer a{color:var(--accent-2);text-decoration:none}
-@media(max-width:600px){.hero{padding:40px 16px 28px}.hero h1{font-size:26px}main{padding:20px 12px 60px}
-  .card{padding:18px}table.kv td:first-child{width:130px}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UAReady - Internationalised Email &amp; Domain Validator</title>
+  <meta name="description"
+    content="Validate internationalised email addresses and domains across scripts - Devanagari, Arabic, Cyrillic, CJK - with SMTPUTF8, EAI, and IDNA2008 compliance." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #050a18;
+      --surface: rgba(15, 23, 42, .65);
+      --surface-2: rgba(30, 41, 59, .5);
+      --border: rgba(99, 115, 146, .2);
+      --border-h: rgba(99, 115, 146, .35);
+      --text: #e2e8f0;
+      --muted: #8b9dc3;
+      --accent: #6366f1;
+      --accent-2: #818cf8;
+      --good: #34d399;
+      --bad: #fb7185;
+      --warn: #fbbf24;
+      --glow: rgba(99, 102, 241, .15);
+      --radius: 14px;
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99, 102, 241, .12), transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 100%, rgba(52, 211, 153, .06), transparent 60%);
+      pointer-events: none
+    }
+
+    .hero {
+      text-align: center;
+      padding: 56px 24px 40px;
+      position: relative
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-h), transparent)
+    }
+
+    .logo {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      margin-bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .logo .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(1.3)
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, #e2e8f0 0%, #818cf8 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+      margin-bottom: 12px
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 600px;
+      margin: 0 auto
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface);
+      backdrop-filter: blur(8px);
+      font-weight: 500;
+      letter-spacing: .3px
+    }
+
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 32px 20px 80px
+    }
+
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: border-color .3s, box-shadow .3s
+    }
+
+    .card:hover {
+      border-color: var(--border-h);
+      box-shadow: 0 0 40px var(--glow)
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .card-title .icon {
+      font-size: 18px
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, .6);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .2s, box-shadow .2s
+    }
+
+    textarea {
+      font-size: 14px;
+      resize: vertical;
+      min-height: 80px
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--glow)
+    }
+
+    select {
+      cursor: pointer;
+      appearance: auto
+    }
+
+    .row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: end
+    }
+
+    .row>* {
+      flex: 1 1 180px;
+      min-width: 0
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px
+    }
+
+    .btn {
+      padding: 11px 20px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all .2s;
+      position: relative;
+      overflow: hidden
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, .3)
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(99, 102, 241, .45)
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border)
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-2)
+    }
+
+    .samples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      align-items: center
+    }
+
+    .samples .label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase
+    }
+
+    .chip {
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      transition: all .2s
+    }
+
+    .chip:hover {
+      border-color: var(--accent);
+      color: var(--accent-2);
+      transform: translateY(-1px)
+    }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 14px;
+      animation: fadeIn .3s ease
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .verdict.ok {
+      background: rgba(52, 211, 153, .12);
+      color: var(--good);
+      border: 1px solid rgba(52, 211, 153, .2)
+    }
+
+    .verdict.bad {
+      background: rgba(251, 113, 133, .12);
+      color: var(--bad);
+      border: 1px solid rgba(251, 113, 133, .2)
+    }
+
+    .verdict::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor
+    }
+
+    table.kv {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px
+    }
+
+    table.kv td {
+      padding: 8px 0;
+      font-size: 14px;
+      vertical-align: top;
+      border-bottom: 1px solid rgba(99, 115, 146, .08)
+    }
+
+    table.kv td:first-child {
+      color: var(--muted);
+      width: 200px;
+      padding-right: 16px;
+      font-weight: 500;
+      font-size: 13px
+    }
+
+    table.kv tr:last-child td {
+      border-bottom: none
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 12px;
+      margin-right: 4px;
+      font-weight: 500
+    }
+
+    .err {
+      color: var(--bad)
+    }
+
+    .warn {
+      color: var(--warn)
+    }
+
+    code,
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px
+    }
+
+    ul.msgs {
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none
+    }
+
+    ul.msgs li {
+      padding: 5px 0;
+      font-size: 14px
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border)
+    }
+
+    footer a {
+      color: var(--accent-2);
+      text-decoration: none
+    }
+
+    @media(max-width:600px) {
+      .hero {
+        padding: 40px 16px 28px
+      }
+
+      .hero h1 {
+        font-size: 26px
+      }
+
+      main {
+        padding: 20px 12px 60px
+      }
+
+      .card {
+        padding: 18px
+      }
+
+      table.kv td:first-child {
+        width: 130px
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<section class="hero">
-  <div class="logo"><span class="dot"></span> UAReady</div>
-  <h1>Internationalised Email &amp; Domain Validator</h1>
-  <p>Validate email addresses and domains across scripts - conforming to global internet standards.</p>
-  <div class="badges">
-    <span class="badge">RFC 6531 - SMTPUTF8</span>
-    <span class="badge">RFC 6532 - EAI</span>
-    <span class="badge">IDNA2008</span>
-    <span class="badge">UTS #46</span>
-    <span class="badge">Unicode NFC</span>
-    <span class="badge">UTS #39</span>
-  </div>
-</section>
+  <section class="hero">
+    <div class="logo"><span class="dot"></span> UAReady</div>
+    <h1>Internationalised Email &amp; Domain Validator</h1>
+    <p>Validate email addresses and domains across scripts - conforming to global internet standards.</p>
+    <div class="badges">
+      <span class="badge">RFC 6531 - SMTPUTF8</span>
+      <span class="badge">RFC 6532 - EAI</span>
+      <span class="badge">IDNA2008</span>
+      <span class="badge">UTS #46</span>
+      <span class="badge">Unicode NFC</span>
+      <span class="badge">UTS #39</span>
+    </div>
+  </section>
 
-<main>
-  <div class="card">
-    <div class="card-title"><span class="icon">&#128269;</span> Validate</div>
-    <div class="row">
-      <div style="flex:3 1 300px">
-        <label for="input">Email or Domain</label>
-        <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="राम@नेपाल.नेपाल" />
+  <main>
+    <div class="card">
+      <div class="card-title"><span class="icon">&#128269;</span> Validate</div>
+      <div class="row">
+        <div style="flex:3 1 300px">
+          <label for="input">Email or Domain</label>
+          <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="राम@नेपाल.नेपाल" />
+        </div>
+        <div style="flex:1 1 130px">
+          <label for="kind">Type</label>
+          <select id="kind">
+            <option value="email">Email</option>
+            <option value="domain">Domain</option>
+          </select>
+        </div>
+        <div style="flex:1 1 130px">
+          <label for="lang">Language</label>
+          <select id="lang">
+            <option value="en">English</option>
+            <option value="ne">नेपाली</option>
+            <option value="hi">हिन्दी</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
       </div>
-      <div style="flex:1 1 130px">
-        <label for="kind">Type</label>
-        <select id="kind"><option value="email">Email</option><option value="domain">Domain</option></select>
+      <div class="actions">
+        <button class="btn btn-primary" id="go">Submit</button>
+        <button class="btn btn-secondary" id="go-mx">Submit + MX Lookup</button>
       </div>
-      <div style="flex:1 1 130px">
-        <label for="lang">Language</label>
-        <select id="lang"><option value="en">English</option><option value="ne">नेपाली</option><option value="hi">हिन्दी</option><option value="ar">العربية</option></select>
+      <div class="samples">
+        <span class="label">Try:</span>
+        <button class="chip" data-sample="राम@नेपाल.नेपाल">राम@नेपाल.नेपाल</button>
+        <button class="chip" data-sample="user@example.np">user@example.np</button>
+        <button class="chip" data-sample="محمد@مثال.السعودية">محمد@مثال.السعودية</button>
+        <button class="chip" data-sample="иван@почта.рф">иван@почта.рф</button>
+        <button class="chip" data-sample="用户@例子.中国">用户@例子.中国</button>
+        <button class="chip" data-sample="नेपाल.नेपाल" data-kind="domain">नेपाल.नेपाल</button>
+        <button class="chip" data-sample="bad..dots@example.com">bad..dots@example.com</button>
       </div>
     </div>
-    <div class="actions">
-      <button class="btn btn-primary" id="go">Validate</button>
-      <button class="btn btn-secondary" id="go-mx">Validate + MX Lookup</button>
+
+    <div id="result" class="card" style="display:none">
+      <div id="verdict-wrap"></div>
+      <table class="kv" id="kv"></table>
+      <div id="errors-block" style="margin-top:10px"></div>
+      <div id="mx-block" style="margin-top:10px"></div>
     </div>
-    <div class="samples">
-      <span class="label">Try:</span>
-      <button class="chip" data-sample="राम@नेपाल.नेपाल">राम@नेपाल.नेपाल</button>
-      <button class="chip" data-sample="user@example.np">user@example.np</button>
-      <button class="chip" data-sample="محمد@مثال.السعودية">محمد@مثال.السعودية</button>
-      <button class="chip" data-sample="иван@почта.рф">иван@почта.рф</button>
-      <button class="chip" data-sample="用户@例子.中国">用户@例子.中国</button>
-      <button class="chip" data-sample="नेपाल.नेपाल" data-kind="domain">नेपाल.नेपाल</button>
-      <button class="chip" data-sample="bad..dots@example.com">bad..dots@example.com</button>
-    </div>
-  </div>
+  </main>
 
-  <div id="result" class="card" style="display:none">
-    <div id="verdict-wrap"></div>
-    <table class="kv" id="kv"></table>
-    <div id="errors-block" style="margin-top:10px"></div>
-    <div id="mx-block" style="margin-top:10px"></div>
-  </div>
-</main>
+  <footer>
+    <strong>UAReady</strong> - built for <a href="#">UA Adaptation Hackathon Nepal 2026</a> - ICANN
+  </footer>
 
-<footer>
-  <strong>UAReady</strong> - built for <a href="#">UA Adaptation Hackathon Nepal 2026</a> - ICANN
-</footer>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const langStrings = {
+      en: { valid: "Valid", invalid: "Invalid" },
+      ne: { valid: "मान्य", invalid: "अमान्य" },
+      hi: { valid: "मान्य", invalid: "अमान्य" },
+      ar: { valid: "صالح", invalid: "غير صالح" },
+    };
 
-<script>
-const $ = (id) => document.getElementById(id);
-const langStrings = {
-  en: { valid: "Valid", invalid: "Invalid" },
-  ne: { valid: "मान्य", invalid: "अमान्य" },
-  hi: { valid: "मान्य", invalid: "अमान्य" },
-  ar: { valid: "صالح", invalid: "غير صالح" },
-};
+    async function validate(withMx) {
+      const value = $("input").value;
+      const kind = $("kind").value;
+      const lang = $("lang").value;
+      if (!value.trim()) return;
+      const res = await fetch("/api/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value, kind, lang, mx: withMx })
+      });
+      render(await res.json(), lang);
+    }
 
-async function validate(withMx) {
-  const value = $("input").value;
-  const kind = $("kind").value;
-  const lang = $("lang").value;
-  if (!value.trim()) return;
-  const res = await fetch("/api/validate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ value, kind, lang, mx: withMx })
-  });
-  render(await res.json(), lang);
-}
+    function render(d, lang) {
+      $("result").style.display = "block";
+      $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      const ok = !!d.ok;
+      const s = langStrings[lang] || langStrings.en;
+      $("verdict-wrap").innerHTML = `<span class="verdict ${ok ? "ok" : "bad"}">${ok ? s.valid : s.invalid}</span>`;
+      const rows = [];
+      const add = (k, v) => { if (v !== undefined && v !== null && v !== "") rows.push([k, v]); };
+      add("Input", `<code>${esc(d.input)}</code>`);
+      if (d.normalized && d.normalized !== d.input) add("NFC normalised", `<code>${esc(d.normalized)}</code>`);
+      if (d.local) add("Local part", `<code>${esc(d.local)}</code>`);
+      const uni = d.domain_unicode || d.unicode;
+      const asc = d.domain_ascii || d.ascii;
+      if (uni) add("Domain (Unicode)", `<code>${esc(uni)}</code>`);
+      if (asc) add("Domain (A-label)", `<code>${esc(asc)}</code>`);
+      if (Array.isArray(d.scripts) && d.scripts.length) {
+        add("Scripts", d.scripts.map(s => `<span class="pill">${esc(s)}</span>`).join(""));
+      }
+      if ("smtputf8_required" in d) add("SMTPUTF8 required", d.smtputf8_required ? "yes (non-ASCII mailbox)" : "no");
+      if ("idn_required" in d) add("IDN encoding", d.idn_required ? "yes (non-ASCII domain)" : "no");
+      $("kv").innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
 
-function render(d, lang) {
-  $("result").style.display = "block";
-  $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
-  const ok = !!d.ok;
-  const s = langStrings[lang] || langStrings.en;
-  $("verdict-wrap").innerHTML = `<span class="verdict ${ok ? "ok" : "bad"}">${ok ? s.valid : s.invalid}</span>`;
-  const rows = [];
-  const add = (k, v) => { if (v !== undefined && v !== null && v !== "") rows.push([k, v]); };
-  add("Input", `<code>${esc(d.input)}</code>`);
-  if (d.normalized && d.normalized !== d.input) add("NFC normalised", `<code>${esc(d.normalized)}</code>`);
-  if (d.local) add("Local part", `<code>${esc(d.local)}</code>`);
-  const uni = d.domain_unicode || d.unicode;
-  const asc = d.domain_ascii || d.ascii;
-  if (uni) add("Domain (Unicode)", `<code>${esc(uni)}</code>`);
-  if (asc) add("Domain (A-label)", `<code>${esc(asc)}</code>`);
-  if (Array.isArray(d.scripts) && d.scripts.length) {
-    add("Scripts", d.scripts.map(s => `<span class="pill">${esc(s)}</span>`).join(""));
-  }
-  if ("smtputf8_required" in d) add("SMTPUTF8 required", d.smtputf8_required ? "yes (non-ASCII mailbox)" : "no");
-  if ("idn_required" in d) add("IDN encoding", d.idn_required ? "yes (non-ASCII domain)" : "no");
-  $("kv").innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+      let eh = "";
+      if ((d.errors || []).length) eh += `<ul class="msgs">${d.errors.map(e => `<li class="err">x ${esc(e)}</li>`).join("")}</ul>`;
+      if ((d.warnings || []).length) eh += `<ul class="msgs">${d.warnings.map(w => `<li class="warn">! ${esc(w)}</li>`).join("")}</ul>`;
+      $("errors-block").innerHTML = eh;
 
-  let eh = "";
-  if ((d.errors || []).length) eh += `<ul class="msgs">${d.errors.map(e => `<li class="err">x ${esc(e)}</li>`).join("")}</ul>`;
-  if ((d.warnings || []).length) eh += `<ul class="msgs">${d.warnings.map(w => `<li class="warn">! ${esc(w)}</li>`).join("")}</ul>`;
-  $("errors-block").innerHTML = eh;
+      let mh = "";
+      if (Array.isArray(d.mx) && d.mx.length) {
+        mh = `<strong style="font-size:13px">MX Records</strong><ul class="msgs">${d.mx.map(([p, h]) => `<li><code>${p}  ${esc(h)}</code></li>`).join("")}</ul>`;
+      } else if (d.mx_error) {
+        mh = `<div class="warn">MX lookup failed: ${esc(d.mx_error)}</div>`;
+      }
+      $("mx-block").innerHTML = mh;
+    }
 
-  let mh = "";
-  if (Array.isArray(d.mx) && d.mx.length) {
-    mh = `<strong style="font-size:13px">MX Records</strong><ul class="msgs">${d.mx.map(([p, h]) => `<li><code>${p}  ${esc(h)}</code></li>`).join("")}</ul>`;
-  } else if (d.mx_error) {
-    mh = `<div class="warn">MX lookup failed: ${esc(d.mx_error)}</div>`;
-  }
-  $("mx-block").innerHTML = mh;
-}
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+    }
 
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
-}
-
-$("go").addEventListener("click", () => validate(false));
-$("go-mx").addEventListener("click", () => validate(true));
-$("input").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") validate(false);
-});
-document.querySelectorAll(".chip").forEach((b) => {
-  b.addEventListener("click", () => {
-    $("input").value = b.dataset.sample;
-    $("kind").value = b.dataset.kind || "email";
-    validate(false);
-  });
-});
-</script>
+    $("go").addEventListener("click", () => validate(false));
+    $("go-mx").addEventListener("click", () => validate(true));
+    $("input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") validate(false);
+    });
+    document.querySelectorAll(".chip").forEach((b) => {
+      b.addEventListener("click", () => {
+        $("input").value = b.dataset.sample;
+        $("kind").value = b.dataset.kind || "email";
+        validate(false);
+      });
+    });
+  </script>
 </body>
+
 </html>

@@ -48,6 +48,7 @@ class TestSendApi(unittest.TestCase):
         )
 
         with patch.dict(os.environ, {"SMTP_FROM_NAME": "Fallback Sender"}, clear=True), \
+                patch("uaready.server.lookup_mx", return_value=[(10, "mx.example.com")]), \
                 patch("uaready.server.SmtpConfig.load", return_value=cfg), \
                 patch("uaready.server._open_smtp", return_value=nullcontext(fake_smtp)):
             response = self.client.post(
@@ -68,17 +69,18 @@ class TestSendApi(unittest.TestCase):
     def test_sends_unicode_recipient_with_smtputf8(self):
         fake_smtp = FakeSMTP()
 
-        with patch("uaready.server._smtp_settings", return_value={
-            "host": "smtp.example.test",
-            "port": 587,
-            "username": "",
-            "password": "",
-            "use_tls": False,
-            "use_ssl": False,
-            "from_email": "sender@example.com",
-            "from_name": "UAReady Mailer",
-            "timeout": 15,
-        }), patch("uaready.server._open_smtp", return_value=nullcontext(fake_smtp)):
+        with patch("uaready.server.lookup_mx", return_value=[(10, "mx.example.com")]), \
+                patch("uaready.server._smtp_settings", return_value={
+                    "host": "smtp.example.test",
+                    "port": 587,
+                    "username": "",
+                    "password": "",
+                    "use_tls": False,
+                    "use_ssl": False,
+                    "from_email": "sender@example.com",
+                    "from_name": "UAReady Mailer",
+                    "timeout": 15,
+                }), patch("uaready.server._open_smtp", return_value=nullcontext(fake_smtp)):
             response = self.client.post(
                 "/api/send",
                 json={
@@ -118,6 +120,37 @@ class TestSendApi(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         data = response.get_json()
         self.assertFalse(data["ok"])
+
+    def test_rejects_unreachable_recipient_domain(self):
+        with patch("uaready.server.lookup_mx", side_effect=RuntimeError("dns failed")), \
+                patch("uaready.server.resolve_a", return_value=[]), \
+                patch("uaready.server._smtp_settings", return_value={
+                    "host": "smtp.example.test",
+                    "port": 587,
+                    "username": "",
+                    "password": "",
+                    "use_tls": False,
+                    "use_ssl": False,
+                    "from_email": "sender@example.com",
+                    "from_name": "UAReady Mailer",
+                    "timeout": 15,
+                }):
+            response = self.client.post(
+                "/api/send",
+                json={
+                    "recipient": "user@example.com",
+                    "subject": "Hello",
+                    "body": "Test body",
+                },
+            )
+
+        self.assertEqual(response.status_code, 400)
+        data = response.get_json()
+        self.assertFalse(data["ok"])
+        self.assertIn(
+            "Recipient domain does not resolve to a reachable mail host: example.com",
+            data["errors"],
+        )
 
     def test_open_smtp_negotiates_starttls_before_login(self):
         calls = []
