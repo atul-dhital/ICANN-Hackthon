@@ -18,7 +18,7 @@ from urllib.parse import urlsplit
 from flask import Flask, request, jsonify, send_from_directory
 
 from .sendmail import SmtpConfig
-from .validator import validate_email, validate_domain, lookup_mx
+from .validator import validate_email, validate_domain, lookup_mx, resolve_a
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(HERE, "static")
@@ -85,9 +85,11 @@ def _validate_compose_payload(payload: dict) -> dict:
     if not to:
         errors.append("Recipient email is required.")
     else:
-        recipient = validate_email(to, lang=lang).to_dict()
+        recipient_result = validate_email(to, lang=lang)
+        recipient = recipient_result.to_dict()
         if recipient.get("ok"):
             warnings.extend(recipient.get("warnings") or [])
+            errors.extend(_recipient_delivery_issues(recipient_result))
         else:
             errors.extend(recipient.get("errors") or ["Recipient email is invalid."])
 
@@ -175,6 +177,32 @@ def _smtp_settings():
         "from_name": from_name,
         "timeout": timeout,
     }
+
+
+def _recipient_delivery_issues(recipient_result) -> list[str]:
+    domain_ascii = (recipient_result.domain_ascii or "").strip()
+    if not domain_ascii:
+        return ["Recipient email is missing a usable mail domain."]
+    if "." not in domain_ascii:
+        return ["Recipient email must use a fully qualified mail domain."]
+
+    try:
+        mx_records = lookup_mx(domain_ascii)
+    except Exception:
+        mx_records = []
+
+    if mx_records:
+        return []
+
+    try:
+        fallback_hosts = resolve_a(domain_ascii)
+    except Exception:
+        fallback_hosts = []
+
+    if fallback_hosts:
+        return []
+
+    return [f"Recipient domain does not resolve to a reachable mail host: {domain_ascii}"]
 
 
 def _message_address(validation, original):
