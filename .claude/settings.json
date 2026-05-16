@@ -21,7 +21,8 @@
       "PowerShell($payload = @{ to = \"user@example.com\"; subject = \"hi\"; body = \"see https://example.com/welcome and bad link http://-bad-.example/x\"; lang = \"ne\" } | ConvertTo-Json -Compress; try { \\(Invoke-WebRequest -Uri http://127.0.0.1:8765/api/compose/validate -Method POST -Body $payload -ContentType \"application/json\" -UseBasicParsing\\).Content } catch { $resp = $_.Exception.Response; if \\($resp\\) { $sr = New-Object IO.StreamReader\\($resp.GetResponseStream\\(\\)\\); $sr.ReadToEnd\\(\\) } else { $_.Exception.Message } })",
       "PowerShell(curl.exe -s -w \"`nHTTP:%{http_code}`n\" -X POST -H \"Content-Type: application/json\" --data $payload http://127.0.0.1:8765/api/compose/validate)",
       "PowerShell($payload = '{\"to\":\"user@example.com\",\"subject\":\"hi\",\"body\":\"see https://example.com/welcome and bad link http://-bad-.example/x\",\"lang\":\"ne\"}')",
-      "PowerShell(Get-NetTCPConnection -LocalPort 8765 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue })"
+      "PowerShell(Get-NetTCPConnection -LocalPort 8765 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue })",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -m unittest discover -s tests -v 2>&1)"
     ]
   }
 }

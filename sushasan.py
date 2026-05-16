@@ -1,33 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-r'''
-     _           _            _     _
-  __| |_ __  ___| |___      _(_)___| |_
- / _` | '_ \/ __| __\ \ /\ / / / __| __|
-| (_| | | | \__ \ |_ \ V  V /| \__ \ |_
- \__,_|_| |_|___/\__| \_/\_/ |_|___/\__|
-
-Generate and resolve domain variations to detect typo squatting,
-phishing and corporate espionage.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-'''
-
-__author__ = 'Marcin Ulikowski'
-__version__ = '20250130'
-__email__ = 'marcin@ulikowski.pl'
-
 import re
 import sys
 import socket

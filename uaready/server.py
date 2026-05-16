@@ -8,6 +8,11 @@ Run:
 import ipaddress
 import os
 import re
+import smtplib
+import ssl
+from email.message import EmailMessage
+from email.policy import SMTPUTF8
+from email.utils import formataddr
 from urllib.parse import urlsplit
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -22,6 +27,8 @@ LINK_RE = re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s<>'\"]+", re.IGNORECASE)
 
 app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="")
 
+
+# ---- link extraction & domain check ----------------------------------------
 
 def _extract_links(*texts):
     links = []
@@ -116,6 +123,57 @@ def _validate_compose_payload(payload: dict) -> dict:
     }
 
 
+# ---- SMTP helpers ----------------------------------------------------------
+
+def _smtp_settings():
+    return {
+        "host": os.environ.get("SMTP_HOST", "").strip(),
+        "port": int(os.environ.get("SMTP_PORT", 587)),
+        "username": os.environ.get("SMTP_USERNAME", "").strip(),
+        "password": os.environ.get("SMTP_PASSWORD", ""),
+        "use_tls": os.environ.get("SMTP_USE_TLS", "1").lower() not in {"0", "false", "no"},
+        "use_ssl": os.environ.get("SMTP_USE_SSL", "0").lower() in {"1", "true", "yes"},
+        "from_email": os.environ.get("SMTP_FROM_EMAIL", "no-reply@example.com").strip(),
+        "from_name": os.environ.get("SMTP_FROM_NAME", "UAReady Mailer").strip(),
+        "timeout": float(os.environ.get("SMTP_TIMEOUT", 15)),
+    }
+
+
+def _message_address(validation, original):
+    if validation.smtputf8_required:
+        return validation.normalized or original
+    if validation.domain_ascii and validation.local and "@" in original:
+        return f"{validation.local}@{validation.domain_ascii}"
+    return validation.normalized or original
+
+
+def _needs_smtputf8(*values):
+    return any(any(ord(ch) > 127 for ch in value) for value in values if isinstance(value, str))
+
+
+def _open_smtp(settings):
+    if not settings["host"]:
+        raise RuntimeError("SMTP_HOST is not configured")
+
+    if settings["use_ssl"]:
+        client = smtplib.SMTP_SSL(
+            settings["host"], settings["port"],
+            timeout=settings["timeout"],
+            context=ssl.create_default_context(),
+        )
+    else:
+        client = smtplib.SMTP(settings["host"], settings["port"], timeout=settings["timeout"])
+        if settings["use_tls"]:
+            client.starttls(context=ssl.create_default_context())
+
+    client.ehlo()
+    if settings["username"]:
+        client.login(settings["username"], settings["password"])
+    return client
+
+
+# ---- routes ----------------------------------------------------------------
+
 @app.route("/")
 def index():
     return send_from_directory(STATIC_DIR, "index.html")
@@ -189,13 +247,19 @@ def api_compose_validate():
 
 @app.route("/api/send", methods=["POST"])
 def api_send():
-    """Stretch goal: live SMTPUTF8 send. Requires uaready/sendmail.ini."""
-    from .sendmail import send
+    """Validate the whole composition (recipient + links + required fields)
+    then send via SMTPUTF8 using environment-configured SMTP credentials.
+
+    Honours both `recipient` (test/frontend) and `to` (CLI) payload keys.
+    """
     payload = request.get_json(force=True, silent=True) or {}
+
+    # Step 1: localised, full-composition pre-flight check.
     compose = _validate_compose_payload(payload)
     if not compose["ok"]:
         return jsonify({
             "ok": False,
+            "error": compose["errors"][0] if compose["errors"] else "invalid composition",
             "errors": compose["errors"],
             "warnings": compose["warnings"],
             "links": compose["links"],
@@ -203,19 +267,63 @@ def api_send():
         }), 400
 
     clean = compose["payload"]
+    recipient = clean["to"]
+    subject = clean["subject"]
+    body = clean["body"]
+    sender_name = clean["sender_name"]
+
+    # Step 2: SMTP envelope prep.
+    recipient_validation = validate_email(recipient)
+    settings = _smtp_settings()
+    sender_validation = validate_email(settings["from_email"])
+    if not sender_validation.ok:
+        return jsonify({
+            "ok": False,
+            "error": "invalid sender configuration",
+            "details": sender_validation.errors,
+        }), 500
+
+    recipient_address = _message_address(recipient_validation, recipient)
+    sender_address = _message_address(sender_validation, settings["from_email"])
+    needs_utf8 = _needs_smtputf8(recipient_address, sender_address)
+
+    message = EmailMessage(policy=SMTPUTF8) if needs_utf8 else EmailMessage()
+    message["Subject"] = subject
+    message["From"] = formataddr((sender_name or settings["from_name"], sender_address))
+    message["To"] = recipient_address
+    message.set_content(body)
+
+    mail_options = ["SMTPUTF8"] if needs_utf8 else []
+
+    # Step 3: deliver.
+    advertised = False
     try:
-        res = send(clean["to"], clean["subject"], clean["body"], sender=clean["from"])
-    except RuntimeError as e:
-        return jsonify({"ok": False, "error": str(e)}), 400
+        with _open_smtp(settings) as client:
+            advertised = bool(client.has_extn("smtputf8"))
+            if needs_utf8 and not advertised:
+                raise smtplib.SMTPNotSupportedError(
+                    "SMTPUTF8 is required but the server does not advertise it"
+                )
+            client.send_message(
+                message,
+                from_addr=sender_address,
+                to_addrs=[recipient_address],
+                mail_options=mail_options,
+            )
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 502
+
     return jsonify({
-        "ok": res.ok,
-        "recipient": clean["to"],
+        "ok": True,
+        "recipient": recipient_address,
+        "sender": sender_address,
+        "smtp_utf8_required": needs_utf8,
+        # Aliases for the /mail/ frontend, which keys off these names.
+        "smtputf8_used": needs_utf8,
+        "smtputf8_advertised": advertised,
+        "message_id": message.get("Message-ID"),
         "links": compose["links"],
         "links_checked": len(compose["links"]),
-        "smtputf8_advertised": res.smtputf8_advertised,
-        "smtputf8_used": res.smtputf8_used,
-        "message_id": res.message_id,
-        "error": res.error,
     })
 
 
