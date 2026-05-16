@@ -2,7 +2,7 @@
 # docker build -t sushasan:phash --build-arg phash=1 .
 
 FROM debian:stable-slim
-MAINTAINER elceef@gmail.com
+LABEL maintainer="elceef@gmail.com"
 
 WORKDIR /opt/sushasan
 

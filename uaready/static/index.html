@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UAReady — internationalised email & domain validator</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #273449;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --good: #22c55e;
+    --bad: #f87171;
+    --warn: #facc15;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Devanagari",
+                 "Noto Sans Arabic", "Noto Sans", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0b1227 0%, #0f172a 100%);
+  }
+  header h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+  main { max-width: 860px; margin: 0 auto; padding: 28px 24px 64px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input[type="text"], select {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+  }
+  input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+  }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+  .row > * { flex: 1 1 200px; min-width: 0; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  button {
+    padding: 10px 16px;
+    background: var(--accent);
+    color: #0b1227;
+    border: 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button.secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  button:hover { filter: brightness(1.05); }
+  .samples {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+  }
+  .samples button {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-weight: 500;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  .verdict {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 4px 10px; border-radius: 999px; font-weight: 600;
+    font-size: 13px;
+  }
+  .verdict.ok { background: rgba(34, 197, 94, 0.15); color: var(--good); }
+  .verdict.bad { background: rgba(248, 113, 113, 0.15); color: var(--bad); }
+  .verdict::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor;
+  }
+  table.kv { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  table.kv td { padding: 6px 0; vertical-align: top; font-size: 14px; }
+  table.kv td:first-child {
+    color: var(--muted); width: 180px; padding-right: 12px; white-space: nowrap;
+  }
+  .pill {
+    display: inline-block; padding: 2px 8px; background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 999px;
+    font-size: 12px; margin-right: 4px;
+  }
+  .err { color: var(--bad); }
+  .warn { color: var(--warn); }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  ul.msgs { margin: 6px 0 0; padding: 0; list-style: none; }
+  ul.msgs li { padding: 4px 0; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; padding: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>UAReady — UA email &amp; domain validator</h1>
+  <p>SMTPUTF8 (RFC 6531) · EAI (RFC 6532) · IDNA2008 · UTS#46 · Unicode NFC</p>
+</header>
+<main>
+  <div class="panel">
+    <div class="row">
+      <div style="flex: 3 1 320px;">
+        <label for="input">Email or domain</label>
+        <input id="input" type="text" autocomplete="off" spellcheck="false"
+               placeholder="राम@नेपाल.नेपाल" />
+      </div>
+      <div style="flex: 1 1 140px;">
+        <label for="kind">Type</label>
+        <select id="kind">
+          <option value="email">Email</option>
+          <option value="domain">Domain</option>
+        </select>
+      </div>
+      <div style="flex: 1 1 140px;">
+        <label for="lang">Error language</label>
+        <select id="lang">
+          <option value="en">English</option>
+          <option value="ne">नेपाली</option>
+          <option value="hi">हिन्दी</option>
+          <option value="ar">العربية</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="go">Validate</button>
+      <button id="go-mx" class="secondary">Validate + MX lookup</button>
+    </div>
+    <div class="samples">
+      <span class="hint" style="margin-right:8px;">Try:</span>
+      <button data-sample="राम@नेपाल.नेपाल">राम@नेपाल.नेपाल</button>
+      <button data-sample="user@example.np">user@example.np</button>
+      <button data-sample="محمد@مثال.السعودية">محمد@مثال.السعودية</button>
+      <button data-sample="иван@почта.рф">иван@почта.рф</button>
+      <button data-sample="नेपाल.नेपाल" data-kind="domain">नेपाल.नेपाल</button>
+      <button data-sample="bad..dots@example.com">bad..dots@example.com</button>
+    </div>
+  </div>
+
+  <div id="result" class="panel" style="display:none;">
+    <div id="verdict-wrap"></div>
+    <table class="kv" id="kv"></table>
+    <div id="errors-block" style="margin-top:10px;"></div>
+    <div id="mx-block" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="panel">
+    <strong>What this checks</strong>
+    <ul style="margin: 8px 0 0 18px; padding: 0; color: var(--muted); font-size: 14px;">
+      <li>Unicode NFC normalisation before any comparison or encoding</li>
+      <li>Domain converted via IDNA2008 + UTS#46 (non-transitional)</li>
+      <li>Local part follows RFC 6532 (any non-ASCII Unicode allowed in mailbox)</li>
+      <li>RFC 5321 length limits — 64 octets local, 253 octets domain, 254 total</li>
+      <li>SMTPUTF8 requirement flagged when mailbox contains non-ASCII</li>
+      <li>Optional: MX lookup against the A-label (punycode) domain</li>
+    </ul>
+  </div>
+</main>
+<footer>UAReady — built for UA Adaptation Hackathon Nepal 2026</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const langStrings = {
+  en: { valid: "Valid", invalid: "Invalid" },
+  ne: { valid: "मान्य",  invalid: "अमान्य" },
+  hi: { valid: "मान्य",  invalid: "अमान्य" },
+  ar: { valid: "صالح",   invalid: "غير صالح" },
+};
+
+async function validate(withMx) {
+  const value = $("input").value;
+  const kind  = $("kind").value;
+  const lang  = $("lang").value;
+  if (!value.trim()) return;
+  const res = await fetch("/api/validate", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ value, kind, lang, mx: withMx })
+  });
+  const data = await res.json();
+  render(data, lang);
+}
+
+function render(d, lang) {
+  $("result").style.display = "block";
+  const ok = !!d.ok;
+  const s = langStrings[lang] || langStrings.en;
+  $("verdict-wrap").innerHTML =
+    `<span class="verdict ${ok ? "ok" : "bad"}">${ok ? s.valid : s.invalid}</span>`;
+
+  const rows = [];
+  const add = (k, v) => { if (v !== undefined && v !== null && v !== "") rows.push([k, v]); };
+  add("Input", `<code>${escape(d.input)}</code>`);
+  if (d.normalized && d.normalized !== d.input) add("NFC normalised", `<code>${escape(d.normalized)}</code>`);
+  if (d.local) add("Local part", `<code>${escape(d.local)}</code>`);
+  const uni = d.domain_unicode || d.unicode;
+  const asc = d.domain_ascii   || d.ascii;
+  if (uni) add("Domain (Unicode)", `<code>${escape(uni)}</code>`);
+  if (asc) add("Domain (ASCII / A-label)", `<code>${escape(asc)}</code>`);
+  if (Array.isArray(d.scripts) && d.scripts.length)
+    add("Scripts detected", d.scripts.map(s => `<span class="pill">${escape(s)}</span>`).join(""));
+  if ("smtputf8_required" in d)
+    add("SMTPUTF8 required", d.smtputf8_required ? "yes (mailbox has non-ASCII)" : "no");
+  if ("idn_required" in d)
+    add("IDN encoding used", d.idn_required ? "yes (domain has non-ASCII)" : "no");
+
+  $("kv").innerHTML = rows.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+
+  let errHtml = "";
+  if ((d.errors || []).length) {
+    errHtml += `<ul class="msgs">` +
+      d.errors.map(e => `<li class="err">✕ ${escape(e)}</li>`).join("") + `</ul>`;
+  }
+  if ((d.warnings || []).length) {
+    errHtml += `<ul class="msgs">` +
+      d.warnings.map(w => `<li class="warn">! ${escape(w)}</li>`).join("") + `</ul>`;
+  }
+  $("errors-block").innerHTML = errHtml;
+
+  let mxHtml = "";
+  if (Array.isArray(d.mx) && d.mx.length) {
+    mxHtml = `<strong>MX records</strong><ul class="msgs">` +
+      d.mx.map(([p,h]) => `<li><code>${p}  ${escape(h)}</code></li>`).join("") + `</ul>`;
+  } else if (d.mx_error) {
+    mxHtml = `<div class="warn">MX lookup failed: ${escape(d.mx_error)}</div>`;
+  }
+  $("mx-block").innerHTML = mxHtml;
+}
+
+function escape(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+  }[c]));
+}
+
+$("go").addEventListener("click", () => validate(false));
+$("go-mx").addEventListener("click", () => validate(true));
+$("input").addEventListener("keydown", (e) => { if (e.key === "Enter") validate(false); });
+document.querySelectorAll(".samples button").forEach(b => {
+  b.addEventListener("click", () => {
+    $("input").value = b.dataset.sample;
+    $("kind").value = b.dataset.kind || "email";
+    validate(false);
+  });
+});
+</script>
+</body>
+</html>
