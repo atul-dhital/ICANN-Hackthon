@@ -17,6 +17,7 @@ from urllib.parse import urlsplit
 
 from flask import Flask, request, jsonify, send_from_directory
 
+from .sendmail import SmtpConfig
 from .validator import validate_email, validate_domain, lookup_mx
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -125,17 +126,54 @@ def _validate_compose_payload(payload: dict) -> dict:
 
 # ---- SMTP helpers ----------------------------------------------------------
 
+SMTP_TRANSPORT_ENV_KEYS = (
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USERNAME",
+    "SMTP_PASSWORD",
+    "SMTP_USE_TLS",
+    "SMTP_USE_SSL",
+    "SMTP_FROM_EMAIL",
+)
+
+
 def _smtp_settings():
+    timeout = float(os.environ.get("SMTP_TIMEOUT", 15))
+    from_name = os.environ.get("SMTP_FROM_NAME", "UAReady Mailer").strip()
+
+    if any(os.environ.get(key) for key in SMTP_TRANSPORT_ENV_KEYS):
+        username = os.environ.get("SMTP_USERNAME", "").strip()
+        from_email = os.environ.get("SMTP_FROM_EMAIL", "").strip() or username or "no-reply@example.com"
+        return {
+            "host": os.environ.get("SMTP_HOST", "").strip(),
+            "port": int(os.environ.get("SMTP_PORT", 587)),
+            "username": username,
+            "password": os.environ.get("SMTP_PASSWORD", ""),
+            "use_tls": os.environ.get("SMTP_USE_TLS", "1").lower() not in {"0", "false", "no"},
+            "use_ssl": os.environ.get("SMTP_USE_SSL", "0").lower() in {"1", "true", "yes"},
+            "from_email": from_email,
+            "from_name": from_name,
+            "timeout": timeout,
+        }
+
+    try:
+        cfg = SmtpConfig.load()
+    except RuntimeError as exc:
+        raise RuntimeError(
+            "SMTP is not configured. Set SMTP_* env vars or configure "
+            "uaready/sendmail.ini / UAREADY_* env vars."
+        ) from exc
+
     return {
-        "host": os.environ.get("SMTP_HOST", "").strip(),
-        "port": int(os.environ.get("SMTP_PORT", 587)),
-        "username": os.environ.get("SMTP_USERNAME", "").strip(),
-        "password": os.environ.get("SMTP_PASSWORD", ""),
-        "use_tls": os.environ.get("SMTP_USE_TLS", "1").lower() not in {"0", "false", "no"},
-        "use_ssl": os.environ.get("SMTP_USE_SSL", "0").lower() in {"1", "true", "yes"},
-        "from_email": os.environ.get("SMTP_FROM_EMAIL", "no-reply@example.com").strip(),
-        "from_name": os.environ.get("SMTP_FROM_NAME", "UAReady Mailer").strip(),
-        "timeout": float(os.environ.get("SMTP_TIMEOUT", 15)),
+        "host": cfg.server,
+        "port": cfg.port,
+        "username": cfg.username,
+        "password": cfg.password,
+        "use_tls": cfg.ssl_mode == "starttls",
+        "use_ssl": cfg.ssl_mode == "ssl",
+        "from_email": (cfg.default_from or cfg.username).strip(),
+        "from_name": from_name,
+        "timeout": timeout,
     }
 
 
@@ -161,12 +199,13 @@ def _open_smtp(settings):
             timeout=settings["timeout"],
             context=ssl.create_default_context(),
         )
+        client.ehlo()
     else:
         client = smtplib.SMTP(settings["host"], settings["port"], timeout=settings["timeout"])
+        client.ehlo()
         if settings["use_tls"]:
             client.starttls(context=ssl.create_default_context())
-
-    client.ehlo()
+            client.ehlo()
     if settings["username"]:
         client.login(settings["username"], settings["password"])
     return client
